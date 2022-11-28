@@ -1,16 +1,14 @@
+import sys
 import json
 
 from datetime import datetime
 from loguru import logger
 
+sys.path.append('..')
+
 from setup import franchize
-from logon import build_session
-from utilities import timer_decorator
-
-
-logger.add(
-     'out.log', backtrace=True, diagnose=True, level='DEBUG'
-)
+from amo.logon import build_session
+from amo.utilities import timer_decorator
 
 
 def build_url(logon_data, entity, filters=None):
@@ -46,42 +44,49 @@ def write_contents(entity, contents):
 
 
 @timer_decorator
-def get_entity(entity, logon_data, tokens_folder, filters=None):
+def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
+    """Function creates session with Logon data specified,
+        and downloads all the data from the Amo instance,
+        writing it to json file {entity}_tmp.json
+        It takes following arguments: \n
+        entity -> str; which entity type will be downloaded
+        logon_data -> named tuple; For generating logon_data
+            use amo.entities.Logon_data
+        tokens_folder -> str; where are tokens, or where should be stored
+        filters: None -> str; so far it should be a just a string specified
+            in Amo API documentanion"""
 
     entity2 = 'events' if entity == 'lead_status_changes' else entity
 
     count = 0
-    session = build_session(logon_data, tokens_folder) 
-    r = request_entities(
-         url=build_url(logon_data, entity2, filters if filter else None),
-         session=session
+    session = build_session(
+        logon_data, tokens_folder,
+        code if code else None
     )
 
-    write_contents(entity2, build_contents(r, entity2))
+    if session:
+        logger.success("Successfully built session!")
+        r = request_entities(
+            url=build_url(logon_data, entity2, filters if filter else None),
+            session=session
+        )
 
-    next_url = build_next(r)
+        write_contents(entity2, build_contents(r, entity2))
+        next_url = build_next(r)
 
-    while True:
-        if next_url:
-            r = request_entities(next_url, session)
-            write_contents(entity, build_contents(r, entity2))
-            next_url = build_next(r)
-            count += 50
-        else:
-            logger.success(f'Approx. {count} records downloaded')
-            session.close()
-            break
+        while True:
 
+            if next_url:
+                r = request_entities(next_url, session)
+                write_contents(entity, build_contents(r, entity2))
+                next_url = build_next(r)
+                count += 50
 
-if __name__ == '__main__':
-    url = f'https://{franchize.subdomain}.amocrm.ru/api/v4/events'
-    filters = '?filter[type]=lead_status_changed&filter[created_at][from]=1667250000'
-    entity = 'lead_status_changes'
-    tokens_folder = 'tokens/franchize'
+            else:
+                logger.success(f'Approx. {count} records downloaded')
+                session.close()
+                return True
 
-    get_entity(entity, franchize, tokens_folder, filters=filters)
-    with open(
-            '../lead_status_changes_last_date.txt', 'w',
-            encoding="utf-8"
-    ) as file:
-        file.write(str(datetime.now()))
+    else:
+        logger.critical('Was not able to build session!')
+        return False

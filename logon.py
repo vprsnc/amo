@@ -1,7 +1,7 @@
 import requests
 import json
-from time import sleep
 
+from time import sleep
 from collections import namedtuple
 from pathlib import Path
 from requests.adapters import HTTPAdapter
@@ -44,8 +44,17 @@ def get_token(logon_data, tokens_folder, code=None):
         logger.info(
             'Refresh token found, using it to get access token...'
         )
-        data = namedtuple('data', logon_data._fields + ('grant_type', 'refresh_token'))
-        login_data = data(*logon_data, grant_type='refresh_token', refresh_token=read_token(tokens_folder, 'refresh'))
+
+        data = namedtuple(
+            'data',
+            logon_data._fields + ('grant_type', 'refresh_token')
+        )
+
+        login_data = data(
+            *logon_data,
+            grant_type='refresh_token',
+            refresh_token=read_token(tokens_folder, 'refresh')
+        )
 
         request = requests.post(new_url, data=login_data._asdict())
         request_dict = json.loads(request.text)
@@ -54,13 +63,19 @@ def get_token(logon_data, tokens_folder, code=None):
             with open(f'{tokens_folder}/access_token.txt', 'w') as file:
                 file.write(request_dict[f"access_token"])
             logger.info('New access token stored.')
+
+            return True
+
         except KeyError:
             logger.critical(request_dict['hint'])
+
+            return False
 
     elif code:
         logger.info(
             'Authorization code has been passed as an argument, using it to get access token...'
         )
+
         data = namedtuple('data', logon_data._fields + ('grant_type', 'code'))
         login_data = data(*logon_data, grant_type='authorization_code', code=code)
 
@@ -68,28 +83,45 @@ def get_token(logon_data, tokens_folder, code=None):
         request_dict = json.loads(request.text)
 
         for token in ['refresh', 'access']:
-            with open(f'{tokens_folder}/{token}_token.txt', 'w') as file:
+
+            with open(
+                    f'{tokens_folder}/{token}_token.txt', 'w',
+                    encoding='utf-8') as file:
+
                 file.write(request_dict[f"{token}_token"])
+
+            return True
 
     else:
         logger.critical("You need to provide code/token!")
 
+        return False
+
 
 def build_session(logon_data, tokens_folder, code=None):
+    """If auth code is provided, token pair will be fetched,
+        otherwise function create a session to Amo API,
+        and will try sending request to get account details.
+        If request is succesfull, session will be returend;
+        Else refresh token will be used to generate acess token."""
 
     if read_token(tokens_folder, 'access') is not None:
         logger.info('Token discoverd, checking if it is fresh...')
         header = {'Authorization': 'Bearer ' + read_token(tokens_folder, 'access')}
         session = token_is_fresh(header, logon_data)
+
         if session is not False:
             logger.success('Token is fresh, building the session.')
             # header = {'Authorization': 'Bearer ' + read_token(tokens_folder, 'access')}
             session.mount('https://', HTTPAdapter(max_retries=5))
             return session
-        else:
-            logger.info('Token is not fresh, refreshing...')
-            get_token(logon_data, tokens_folder)
+
+        logger.info('Token is not fresh, refreshing...')
+
+        if get_token(logon_data, tokens_folder):
             return build_session(logon_data, tokens_folder)
+
+            logger.critical("Something wend wrong!")
 
     else:
         get_token(logon_data, tokens_folder, code)

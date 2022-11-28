@@ -1,5 +1,5 @@
 from datetime import datetime
-from entities import *
+from amo.entities import *
 
 
 def build_lead_status_changes_tuple(entry):
