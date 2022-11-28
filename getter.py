@@ -40,7 +40,7 @@ def build_next(r):
 
 def write_contents(entity, contents):
     for c in contents:
-        with open(f'{entity}_tmp.json', 'a', encoding='utf-8') as file:
+        with open(f'../{entity}_tmp.json', 'a', encoding='utf-8') as file:
             json.dump(c, file, indent=4)
             file.write(',\n')
 
@@ -77,8 +77,11 @@ if __name__ == '__main__':
     url = f'https://{franchize.subdomain}.amocrm.ru/api/v4/events'
     filters = '?filter[type]=lead_status_changed&filter[created_at][from]=1667250000'
     entity = 'lead_status_changes'
-    tokens_folder='tokens/franchize'
+    tokens_folder = 'tokens/franchize'
 
     get_entity(entity, franchize, tokens_folder, filters=filters)
-    with open('lead_status_changes_last_date.txt', 'w') as file:
+    with open(
+            '../lead_status_changes_last_date.txt', 'w',
+            encoding="utf-8"
+    ) as file:
         file.write(str(datetime.now()))
