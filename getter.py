@@ -11,6 +11,11 @@ from amo.logon import build_session
 from amo.utilities import timer_decorator
 
 
+def record_last_time(entity):
+    with open(f'{entity}_last_date.txt', 'w') as f:
+        f.write(datetime.now())
+
+
 def build_url(logon_data, entity, filters=None):
     url = f'https://{logon_data.subdomain}.amocrm.ru/api/v4/{entity}'
     return url + filters if filters else url
@@ -38,7 +43,7 @@ def build_next(r):
 
 def write_contents(entity, contents):
     for c in contents:
-        with open(f'../{entity}_tmp.json', 'a', encoding='utf-8') as file:
+        with open(f'temp_data/{entity}_tmp.json', 'a', encoding='utf-8') as file:
             json.dump(c, file, indent=4)
             file.write(',\n')
 
@@ -80,12 +85,15 @@ def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
                 r = request_entities(next_url, session)
                 write_contents(entity, build_contents(r, entity2))
                 next_url = build_next(r)
+                logger.info(next_url)
                 count += 50
 
             else:
+                record_last_time(entity)
                 logger.success(f'Approx. {count} records downloaded')
                 session.close()
-                return True
+
+        return True
 
     else:
         logger.critical('Was not able to build session!')

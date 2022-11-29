@@ -9,4 +9,5 @@ venv
 build
 htmlcov
 *.nix
-*.json
+
+temp_data
