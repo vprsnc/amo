@@ -11,9 +11,9 @@ from amo.logon import build_session
 from amo.utilities import timer_decorator
 
 
-def record_last_time(entity):
-    with open(f'{entity}_last_date.txt', 'w') as f:
-        f.write(datetime.now())
+def record_last_time(entity, amo):
+    with open(f'{amo}_{entity}_last_date.txt', 'w') as f:
+        f.write(str(datetime.now()))
 
 
 def build_url(logon_data, entity, filters=None):
@@ -41,9 +41,9 @@ def build_next(r):
         return False
 
 
-def write_contents(entity, contents):
+def write_contents(entity, contents, amo):
     for c in contents:
-        with open(f'temp_data/{entity}_tmp.json', 'a', encoding='utf-8') as file:
+        with open(f'temp_data/{amo}_{entity}_tmp.json', 'a', encoding='utf-8') as file:
             json.dump(c, file, indent=4)
             file.write(',\n')
 
@@ -76,20 +76,20 @@ def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
             session=session
         )
 
-        write_contents(entity2, build_contents(r, entity2))
+        write_contents(entity, build_contents(r, entity2), logon_data.subdomain)
         next_url = build_next(r)
 
         while True:
 
             if next_url:
                 r = request_entities(next_url, session)
-                write_contents(entity, build_contents(r, entity2))
+                write_contents(entity, build_contents(r, entity2), logon_data.subdomain)
                 next_url = build_next(r)
                 logger.info(next_url)
                 count += 50
 
             else:
-                record_last_time(entity)
+                record_last_time(entity, logon_data.subdomain)
                 logger.success(f'Approx. {count} records downloaded')
                 session.close()
 
