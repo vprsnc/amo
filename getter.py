@@ -49,7 +49,7 @@ def write_contents(entity, contents, amo):
 
 
 @timer_decorator
-def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
+def get_entity(entity, logon_data, amo, filters=None, code=None):
     """Function creates session with Logon data specified,
         and downloads all the data from the Amo instance,
         writing it to json file {entity}_tmp.json
@@ -65,7 +65,7 @@ def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
 
     count = 0
     session = build_session(
-        logon_data, tokens_folder,
+        logon_data, f'tokens/{amo}',
         code if code else None
     )
 
@@ -76,14 +76,14 @@ def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
             session=session
         )
 
-        write_contents(entity, build_contents(r, entity2), logon_data.subdomain)
+        write_contents(entity, build_contents(r, entity2), amo)
         next_url = build_next(r)
 
         while True:
 
             if next_url:
                 r = request_entities(next_url, session)
-                write_contents(entity, build_contents(r, entity2), logon_data.subdomain)
+                write_contents(entity, build_contents(r, entity2), amo)
                 next_url = build_next(r)
                 logger.info(next_url)
                 count += 50
@@ -92,9 +92,7 @@ def get_entity(entity, logon_data, tokens_folder, filters=None, code=None):
                 record_last_time(entity, logon_data.subdomain)
                 logger.success(f'Approx. {count} records downloaded')
                 session.close()
+                return True
 
-        return True
-
-    else:
-        logger.critical('Was not able to build session!')
-        return False
+    logger.critical('Was not able to build session!')
+    return False
