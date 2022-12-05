@@ -24,7 +24,7 @@ def read_token(amo, token_type):
         return None
 
 
-def token_is_fresh(header, logon_data):
+def token_is_fresh(header, logon_data, amo):
     s = requests.Session()
     s.headers.update(header)
     if s.get(
@@ -32,45 +32,53 @@ def token_is_fresh(header, logon_data):
         headers=header
     ).status_code == 200:
         return s
+
     s.close()
+    sleep(5)
+    if refresh_token(logon_data, amo):
+        return token_is_fresh(header, logon_data, amo)
+
+    logger.critical("Refreshing token failed!")
     return False
+
+
+def refresh_token(logon_data, amo):
+    new_url = f'https://{logon_data.subdomain}.amocrm.ru/oauth2/access_token'
+    read_token(amo, 'refresh')
+    logger.info(
+        'Refresh token found, using it to get access token...'
+    )
+
+    data = namedtuple(
+        'data',
+        logon_data._fields + ('grant_type', 'refresh_token')
+    )
+
+    login_data = data(
+        *logon_data,
+        grant_type='refresh_token',
+        refresh_token=read_token(amo, 'refresh')
+    )
+
+    request = requests.post(new_url, data=login_data._asdict())
+    request_dict = json.loads(request.text)
+    try:
+        with open(f'tokens/{amo}/access_token.txt', 'w') as file:
+            file.write(request_dict[f"access_token"])
+        logger.info('New access token stored.')
+
+        return True
+
+    except KeyError:
+        logger.critical(request_dict['hint'])
+
+        return False
 
 
 def get_token(logon_data, amo, code=None):
     new_url = f'https://{logon_data.subdomain}.amocrm.ru/oauth2/access_token'
 
-    if read_token(amo, 'refresh'):
-        logger.info(
-            'Refresh token found, using it to get access token...'
-        )
-
-        data = namedtuple(
-            'data',
-            logon_data._fields + ('grant_type', 'refresh_token')
-        )
-
-        login_data = data(
-            *logon_data,
-            grant_type='refresh_token',
-            refresh_token=read_token(amo, 'refresh')
-        )
-
-        request = requests.post(new_url, data=login_data._asdict())
-        request_dict = json.loads(request.text)
-
-        try:
-            with open(f'tokens/{amo}/access_token.txt', 'w') as file:
-                file.write(request_dict[f"access_token"])
-            logger.info('New access token stored.')
-
-            return True
-
-        except KeyError:
-            logger.critical(request_dict['hint'])
-
-            return False
-
-    elif code:
+    if code:
         logger.info(
             'Authorization code has been passed as an argument, using it to get access token...'
         )
@@ -91,10 +99,8 @@ def get_token(logon_data, amo, code=None):
 
             return True
 
-    else:
-        logger.critical("You need to provide code/token!")
-
-        return False
+    logger.critical("You need to provide code/token!")
+    return False
 
 
 def build_session(logon_data, amo, code=None):
@@ -106,8 +112,8 @@ def build_session(logon_data, amo, code=None):
 
     if read_token(amo, 'access') is not None:
         logger.info('Token discoverd, checking if it is fresh...')
-        header = {'Authorization': 'Bearer ' + read_token(f"tokens/{amo}", 'access')}
-        session = token_is_fresh(header, logon_data)
+        header = {'Authorization': 'Bearer ' + read_token(amo, 'access')}
+        session = token_is_fresh(header, logon_data, amo)
 
         if session is not False:
             logger.success('Token is fresh, building the session.')
@@ -115,12 +121,10 @@ def build_session(logon_data, amo, code=None):
             session.mount('https://', HTTPAdapter(max_retries=5))
             return session
 
-        logger.info('Token is not fresh, refreshing...')
-
         if get_token(logon_data, amo):
             return build_session(logon_data, amo)
 
-            logger.critical("Something wend wrong!")
+        logger.critical("Something went wrong!")
 
     else:
         get_token(logon_data, amo, code)
