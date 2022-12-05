@@ -89,7 +89,7 @@ def get_entity(entity, logon_data, amo, filters=None, code=None):
                 count += 50
 
             else:
-                record_last_time(entity, logon_data.subdomain)
+                record_last_time(entity, amo)
                 logger.success(f'Approx. {count} records downloaded')
                 session.close()
                 return True
