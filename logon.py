@@ -89,15 +89,18 @@ def get_token(logon_data, amo, code=None):
         request = requests.post(new_url, data=login_data._asdict())
         request_dict = json.loads(request.text)
 
-        for token in ['refresh', 'access']:
+        if request.status_code == 200:
 
-            with open(
-                    f'tokens/{amo}/{token}_token.txt', 'w',
-                    encoding='utf-8') as file:
+            for token in ['refresh', 'access']:
 
-                file.write(request_dict[f"{token}_token"])
+                with open(
+                        f'tokens/{amo}/{token}_token.txt', 'w',
+                        encoding='utf-8') as file:
 
-            return True
+                    file.write(request_dict[f"{token}_token"])
+
+                return True
+        logger.critical(request_dict)
 
     logger.critical("You need to provide code/token!")
     return False
@@ -129,4 +132,3 @@ def build_session(logon_data, amo, code=None):
             return build_session(logon_data, amo)
 
         logger.critical("Something went wrong!")
-
