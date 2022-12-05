@@ -110,6 +110,10 @@ def build_session(logon_data, amo, code=None):
         If request is succesfull, session will be returend;
         Else refresh token will be used to generate acess token."""
 
+    if code:
+        get_token(logon_data, amo, code)
+        return build_session(logon_data, amo)
+
     if read_token(amo, 'access') is not None:
         logger.info('Token discoverd, checking if it is fresh...')
         header = {'Authorization': 'Bearer ' + read_token(amo, 'access')}
@@ -126,6 +130,3 @@ def build_session(logon_data, amo, code=None):
 
         logger.critical("Something went wrong!")
 
-    else:
-        get_token(logon_data, amo, code)
-        return build_session(logon_data, amo)
