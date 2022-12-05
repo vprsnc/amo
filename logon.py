@@ -92,7 +92,7 @@ def get_token(logon_data, amo, code=None):
         for token in ['refresh', 'access']:
 
             with open(
-                    f'/tokens{amo}/{token}_token.txt', 'w',
+                    f'/tokens/{amo}/{token}_token.txt', 'w',
                     encoding='utf-8') as file:
 
                 file.write(request_dict[f"{token}_token"])
