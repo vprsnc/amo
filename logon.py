@@ -31,10 +31,9 @@ def token_is_fresh(header, logon_data):
         f'https://{logon_data.subdomain}.amocrm.ru/api/v4/account',
         headers=header
     ).status_code == 200:
-        sleep(5)
         return s
-    else:
-        return False
+    s.close()
+    return False
 
 
 def get_token(logon_data, tokens_folder, code=None):
