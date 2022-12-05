@@ -92,15 +92,13 @@ def get_token(logon_data, amo, code=None):
         if request.status_code == 200:
 
             for token in ['refresh', 'access']:
-
                 with open(
                         f'tokens/{amo}/{token}_token.txt', 'w',
                         encoding='utf-8') as file:
-
                     file.write(request_dict[f"{token}_token"])
 
                 return True
-        logger.critical(request_dict)
+        logger.critical(request_dict['hint'])
 
     logger.critical("You need to provide code/token!")
     return False
