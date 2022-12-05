@@ -65,7 +65,7 @@ def get_entity(entity, logon_data, amo, filters=None, code=None):
 
     count = 0
     session = build_session(
-        logon_data, f'tokens/{amo}',
+        logon_data, amo,
         code if code else None
     )
 

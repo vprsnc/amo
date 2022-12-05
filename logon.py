@@ -16,9 +16,9 @@ from setup import franchize
 # )
 
 
-def read_token(tokens_folder, token_type):
+def read_token(amo, token_type):
     try:
-        access_token = Path(f"./{tokens_folder}/{token_type}_token.txt").read_text()
+        access_token = Path(f"./tokens/{amo}/{token_type}_token.txt").read_text()
         return access_token
     except FileNotFoundError:
         return None
@@ -36,10 +36,10 @@ def token_is_fresh(header, logon_data):
     return False
 
 
-def get_token(logon_data, tokens_folder, code=None):
+def get_token(logon_data, amo, code=None):
     new_url = f'https://{logon_data.subdomain}.amocrm.ru/oauth2/access_token'
 
-    if read_token(tokens_folder, 'refresh'):
+    if read_token(amo, 'refresh'):
         logger.info(
             'Refresh token found, using it to get access token...'
         )
@@ -52,14 +52,14 @@ def get_token(logon_data, tokens_folder, code=None):
         login_data = data(
             *logon_data,
             grant_type='refresh_token',
-            refresh_token=read_token(tokens_folder, 'refresh')
+            refresh_token=read_token(amo, 'refresh')
         )
 
         request = requests.post(new_url, data=login_data._asdict())
         request_dict = json.loads(request.text)
 
         try:
-            with open(f'{tokens_folder}/access_token.txt', 'w') as file:
+            with open(f'tokens/{amo}/access_token.txt', 'w') as file:
                 file.write(request_dict[f"access_token"])
             logger.info('New access token stored.')
 
@@ -84,7 +84,7 @@ def get_token(logon_data, tokens_folder, code=None):
         for token in ['refresh', 'access']:
 
             with open(
-                    f'{tokens_folder}/{token}_token.txt', 'w',
+                    f'/tokens{amo}/{token}_token.txt', 'w',
                     encoding='utf-8') as file:
 
                 file.write(request_dict[f"{token}_token"])
@@ -97,31 +97,31 @@ def get_token(logon_data, tokens_folder, code=None):
         return False
 
 
-def build_session(logon_data, tokens_folder, code=None):
+def build_session(logon_data, amo, code=None):
     """If auth code is provided, token pair will be fetched,
         otherwise function create a session to Amo API,
         and will try sending request to get account details.
         If request is succesfull, session will be returend;
         Else refresh token will be used to generate acess token."""
 
-    if read_token(tokens_folder, 'access') is not None:
+    if read_token(amo, 'access') is not None:
         logger.info('Token discoverd, checking if it is fresh...')
-        header = {'Authorization': 'Bearer ' + read_token(tokens_folder, 'access')}
+        header = {'Authorization': 'Bearer ' + read_token(f"tokens/{amo}", 'access')}
         session = token_is_fresh(header, logon_data)
 
         if session is not False:
             logger.success('Token is fresh, building the session.')
-            # header = {'Authorization': 'Bearer ' + read_token(tokens_folder, 'access')}
+            # header = {'Authorization': 'Bearer ' + read_token(amo, 'access')}
             session.mount('https://', HTTPAdapter(max_retries=5))
             return session
 
         logger.info('Token is not fresh, refreshing...')
 
-        if get_token(logon_data, tokens_folder):
-            return build_session(logon_data, tokens_folder)
+        if get_token(logon_data, amo):
+            return build_session(logon_data, amo)
 
             logger.critical("Something wend wrong!")
 
     else:
-        get_token(logon_data, tokens_folder, code)
-        return build_session(logon_data, tokens_folder)
+        get_token(logon_data, amo, code)
+        return build_session(logon_data, amo)
