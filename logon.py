@@ -97,7 +97,7 @@ def get_token(logon_data, amo, code=None):
                         encoding='utf-8') as file:
                     file.write(request_dict[f"{token}_token"])
 
-                return True
+            return True
         logger.critical(request_dict['hint'])
 
     logger.critical("You need to provide code/token!")
