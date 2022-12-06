@@ -130,3 +130,5 @@ def build_session(logon_data, amo, code=None):
             return build_session(logon_data, amo)
 
         logger.critical("Something went wrong!")
+
+    logger.critical("Tokens weren't found")
