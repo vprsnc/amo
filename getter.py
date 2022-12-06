@@ -12,7 +12,7 @@ from amo.utilities import timer_decorator
 
 
 def record_last_time(entity, amo):
-    with open(f'{amo}_{entity}_last_date.txt', 'w') as f:
+    with open(f'last_date_{amo}_{entity}.txt', 'w') as f:
         f.write(str(datetime.now()))
 
 
