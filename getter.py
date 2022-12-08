@@ -79,16 +79,13 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
             session=session
         )
 
-        try:
-            write_contents(
-                entity_true_name,
-                build_contents(r, entity_true_name),
-                amo
-            )
-            next_url = build_next(r)
-        except Exception as e:
-            print(e)
-            return False
+        contents = build_contents(r, entity_true_name),
+        write_contents(
+            entity_true_name,
+            contents
+            amo
+        )
+        next_url = build_next(r)
 
         while True:
 
