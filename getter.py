@@ -78,8 +78,9 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
             url=build_url(logon_data, entity, filters if filters else None),
             session=session
         )
+# NOTE it's all ok with r, it returns the correct dict
 
-        contents = build_contents(r, entity_true_name),
+        contents = build_contents(r, entity_true_name)
         print(contents)
         write_contents(
             entity_true_name,
