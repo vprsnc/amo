@@ -76,14 +76,22 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
             session=session
         )
 
-        write_contents(entity, build_contents(r, entity_true_name), amo)
+        write_contents(
+            entity,
+            build_contents(r, entity_true_name),
+            amo
+        )
         next_url = build_next(r)
 
         while True:
 
             if next_url:
                 r = request_entities(next_url, session)
-                write_contents(entity, build_contents(r, entity_true_name), amo)
+                write_contents(
+                    entity_true_name,
+                    build_contents(r, entity_true_name),
+                    amo
+                )
                 next_url = build_next(r)
                 logger.info(next_url)
                 count += 50
