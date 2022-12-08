@@ -16,6 +16,7 @@ def record_last_time(entity, amo):
         f.write(str(datetime.now()))
 
 
+
 def build_url(logon_data, entity, filters=None):
     url = f'https://{logon_data.subdomain}.amocrm.ru/api/v4/{entity}'
     return url + filters if filters else url
@@ -78,12 +79,15 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
             session=session
         )
 
-        write_contents(
-            entity_true_name,
-            build_contents(r, entity_true_name),
-            amo
-        )
-        next_url = build_next(r)
+        try:
+            write_contents(
+                entity_true_name,
+                build_contents(r, entity_true_name),
+                amo
+            )
+            next_url = build_next(r)
+        except Exception as e:
+            return e
 
         while True:
 
