@@ -2,10 +2,10 @@ from datetime import datetime
 from amo.entities import *
 
 
-def build_lead_status_changes_tuple(entry):
+def build_lead_status_changed_tuple(entry):
     """Function returns Lead_status_changes class
         from entities.py"""
-    return Lead_status_change(
+    return Lead_status_changed(
             id_=entry['id'],
             type_=entry['type'],
             entity_id=entry['entity_id'],

@@ -7,7 +7,7 @@ Logon_data = namedtuple(
     )
 
 
-Lead_status_change = namedtuple(
+Lead_status_changed = namedtuple(
     'lead_status_changes',
     [
         'id_',
