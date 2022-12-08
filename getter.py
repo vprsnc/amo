@@ -87,7 +87,8 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
             )
             next_url = build_next(r)
         except Exception as e:
-            return e
+            print(e)
+            return False
 
         while True:
 
