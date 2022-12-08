@@ -49,7 +49,7 @@ def write_contents(entity, contents, amo):
 
 
 @timer_decorator
-def get_entity(entity, logon_data, amo, filters=None, code=None):
+def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=None):
     """Function creates session with Logon data specified,
         and downloads all the data from the Amo instance,
         writing it to json file {entity}_tmp.json
@@ -61,7 +61,7 @@ def get_entity(entity, logon_data, amo, filters=None, code=None):
         filters: None -> str; so far it should be a just a string specified
             in Amo API documentanion"""
 
-    entity2 = 'events' if entity == 'lead_status_changes' else entity
+    entity_true_name = entity_subtype if entity_subtype else entity
 
     count = 0
     session = build_session(
@@ -72,18 +72,18 @@ def get_entity(entity, logon_data, amo, filters=None, code=None):
     if session:
         logger.success("Successfully built session!")
         r = request_entities(
-            url=build_url(logon_data, entity2, filters if filter else None),
+            url=build_url(logon_data, entity, filters if filters else None),
             session=session
         )
 
-        write_contents(entity, build_contents(r, entity2), amo)
+        write_contents(entity, build_contents(r, entity_true_name), amo)
         next_url = build_next(r)
 
         while True:
 
             if next_url:
                 r = request_entities(next_url, session)
-                write_contents(entity, build_contents(r, entity2), amo)
+                write_contents(entity, build_contents(r, entity_true_name), amo)
                 next_url = build_next(r)
                 logger.info(next_url)
                 count += 50

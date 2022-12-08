@@ -33,6 +33,7 @@ def token_is_fresh(header, logon_data, amo):
     ).status_code == 200:
         return s
 
+    logger.critical("Token is not fresh, refreshing...")
     s.close()
     sleep(5)
     if refresh_token(logon_data, amo):
@@ -65,7 +66,7 @@ def refresh_token(logon_data, amo):
     try:
         with open(f'tokens/{amo}/access_token.txt', 'w') as file:
             file.write(request_dict[f"access_token"])
-        logger.info('New access token stored.')
+        logger.success('Token refreshed, building session...')
 
         return True
 
