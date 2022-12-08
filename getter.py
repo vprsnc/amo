@@ -72,13 +72,14 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
     if session:
         logger.success("Successfully built session!")
 
-        url=build_url(logon_data, entity, filters if filters else None)
-        print(url)
 
-        r = request_entities(url, session=session)
+        r = request_entities(
+            url=build_url(logon_data, entity, filters if filters else None),
+            session=session
+        )
 
         write_contents(
-            entity,
+            entity_true_name,
             build_contents(r, entity_true_name),
             amo
         )
