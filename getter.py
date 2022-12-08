@@ -82,7 +82,7 @@ def get_entity(entity, logon_data, amo, entity_subtype=None, filters=None, code=
         contents = build_contents(r, entity_true_name),
         write_contents(
             entity_true_name,
-            contents
+            contents,
             amo
         )
         next_url = build_next(r)
