@@ -33,6 +33,5 @@ Calls = namedtuple(
         'entity_type',
         'created_by',
         'created_at',
-        'updated_at',
     ]
 )
