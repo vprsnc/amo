@@ -90,6 +90,7 @@ def get_entity(
 
     # First, check if entity subtype was passed:
     entity_true_name = entity_subtype if entity_subtype else entity
+    logger.info(f"Building session for {entity_true_name}...")
 
     count = 0
     session = build_session(
@@ -126,7 +127,7 @@ def get_entity(
                 count += 50
 
             else:
-                record_last_time(entity, amo)
+                record_last_time(entity_true_name, amo)
                 logger.success(f'Approx. {count} records downloaded')
                 session.close()
                 return True
