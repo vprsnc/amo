@@ -20,3 +20,16 @@ def build_lead_status_changed_tuple(entry):
         ['lead_status']['pipeline_id'],
             account_id=entry['account_id']
         )
+
+
+def build_calls(entry):
+    """Function returns Calls class
+        from entities.py"""
+    return Calls(
+            id_=entry['id'],
+            type_=entry['type'],
+            entity_id=entry['entity_id'],
+            entity_type=entry['entity_type'],
+            created_by=entry['created_by'],
+            created_at=str(datetime.fromtimestamp(entry['created_at'])),
+        )

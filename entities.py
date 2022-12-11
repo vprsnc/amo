@@ -23,3 +23,16 @@ Lead_status_changed = namedtuple(
         'account_id'
         ]
     )
+
+Calls = namedtuple(
+    'calls',
+    [
+        'id_',
+        'type_',
+        'entity_id',
+        'entity_type',
+        'created_by',
+        'created_at',
+        'updated_at',
+    ]
+)
