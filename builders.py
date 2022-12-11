@@ -22,7 +22,7 @@ def build_lead_status_changed_tuple(entry):
         )
 
 
-def build_calls(entry):
+def build_calls_tuple(entry):
     """Function returns Calls class
         from entities.py"""
     return Calls(
