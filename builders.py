@@ -33,3 +33,25 @@ def build_calls_tuple(entry):
             created_by=entry['created_by'],
             created_at=str(datetime.fromtimestamp(entry['created_at'])),
         )
+
+def build_leads_tuple(entry):
+    """Function returns Leads class
+        from entities.py"""
+    return Leads(
+            id_=entry['id'],
+            name=entry['name'],
+            price=entry['price'],
+            responsible_user_id=entry['responsible_user_id'],
+            group_id=entry['group_id'],
+            status_id=entry['status_id'],
+            pipeline_id=entry['pipeline_id'],
+            loss_reason_id=entry['loss_reason_id'],
+            updated_by=entry['updated_by'],
+            updated_at=str(datetime.fromtimestamp(entry['updated_at'])),
+            created_at=str(datetime.fromtimestamp(entry['created_at'])),
+            closed_at=entry['closed_at'],
+            created_by=entry['created_by'],
+            closest_task_at=entry['closest_task_at'],
+            is_deleted=entry['is_deleted'],
+            custom_fields_values=entry['custom_fields_values']
+    )
