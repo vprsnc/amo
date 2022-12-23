@@ -26,7 +26,7 @@ def request_entities(url, session):
     request = session.get(url)
     if request.status_code == 200:
         return request
-    logger.critical(f'Something is wrong here!: {request.text}')
+    logger.critical(f'Something is wrong here!: {request.status_code}: {request.text}')
     return False
 
 
