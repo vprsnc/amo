@@ -27,11 +27,15 @@ def build_calls_tuple(entry):
         from entities.py"""
     return Calls(
             id_=entry['id'],
-            type_=entry['type'],
+            note_type=entry['note_type'],
+            responsible_user_id=entry['responsible_user_id'],
             entity_id=entry['entity_id'],
-            entity_type=entry['entity_type'],
             created_by=entry['created_by'],
             created_at=str(datetime.fromtimestamp(entry['created_at'])),
+            updated_by=entry['updated_by'],
+            updated_at=str(datetime.fromtimestamp(entry['updated_at'])),
+            duration=entry['params']['duration'],
+            phone=entry['params']['phone'],
         )
 
 def build_leads_tuple(entry):

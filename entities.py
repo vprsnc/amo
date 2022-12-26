@@ -28,11 +28,16 @@ Calls = namedtuple(
     'calls',
     [
         'id_',
-        'type_',
+        'note_type',
         'entity_id',
+        'responsible_user_id'
         'entity_type',
         'created_by',
         'created_at',
+        'updated_by',
+        'updated_at',
+        'phone',
+        'duration'
     ]
 )
 
