@@ -123,7 +123,6 @@ def get_entity(
                     amo
                 )
                 next_url = build_next(r)
-                logger.info(next_url)
                 count += 50
 
             else:
