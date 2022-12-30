@@ -8,7 +8,6 @@ sys.path.append('..')
 
 from setup import franchize
 from amo.logon import build_session
-from amo.utilities import timer_decorator
 
 
 def record_last_time(entity, amo):
@@ -57,7 +56,6 @@ def write_contents(entity, contents, amo):
             file.write(',\n')
 
 
-@timer_decorator
 def get_entity(
         entity, logon_data, amo,
         entity_subtype=None, filters=None, code=None
