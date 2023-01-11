@@ -25,12 +25,15 @@ def read_token(amo, token_type):
 
 
 def token_is_fresh(header, logon_data, amo):
+    """Making a very simple request to amo.
+       If all's well, return session, if not refresh token, repeat."""
     s = requests.Session()
     s.headers.update(header)
-    if s.get(
+    r = s.get(
         f'https://{logon_data.subdomain}.amocrm.ru/api/v4/account',
         headers=header
-    ).status_code == 200:
+    )
+    if r.status_code == 200:
         return s
 
     logger.critical("Token is not fresh, refreshing...")
